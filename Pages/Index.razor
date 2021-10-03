@@ -1,0 +1,67 @@
+﻿@page "/"
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@inject HttpClient Http
+
+<section class="leaderboard">
+    <div class="title-div">
+        <a href="#">My Raptr Stats</a>
+    </div>
+    <center class="center">
+        <div id="container-names" class="names-container" style="overflow-x:auto;">
+            <table id="table-names" class="entry-table">
+                <thead class="table-head">
+                    <tr class="table-column">
+                        <th class="cover-image">Cover</th>
+                        <th class="game-title">Game</th>
+                        <th class="time-total">Total Hours Played</th>
+                        <th class="last-played">Last Played</th>
+                    </tr>
+                </thead>
+                <tbody class="table-body">
+                    @foreach (var item in stats)
+                    {
+                        <tr class="table-row">
+                            <td class="my-image"><img src=@item.image /></td>
+                            <td>@item.title.ToString()</td>
+                            <td>@item.total_playtime_hours.ToString()</td>
+                            <td class="date">@item.last_played_date.ToString()</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </center>
+</section>
+
+@code
+{
+    private List<Stats> stats;
+
+    protected override async Task OnInitializedAsync()
+    {
+        //Http.DefaultRequestHeaders.Add("Content-Type", "application/json");
+        stats = new List<Stats>();
+        var results = await Http.GetFromJsonAsync<Stats[]>(Configuration["my_raptr_playtime_url"]);
+        foreach (var item in results)
+        {
+            stats.Add(item);
+        }
+    }
+
+    public class Stats
+    {
+        public string title { get; set; }
+
+        public string total_playtime_seconds { get; set; }
+
+        public double total_playtime_hours { get; set; }
+
+        public string last_played_timestamp { get; set; }
+
+        public string last_played_date { get; set; }
+
+        public string image { get; set; }
+    }
+
+}
